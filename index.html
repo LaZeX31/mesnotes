@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF1F6">
+<meta name="description" content="Prends des notes simplement, tout reste sur ton appareil.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Notes">
+<title>Mes notes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#EEF1F6;--panel:#FFFFFF;--ink:#1B2433;--soft:#5B6579;--line:#D9DFEA;--accent:#4F6BED;--onaccent:#FFFFFF;--hover:#F3F5FA;--esize:17px;--efont:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",system-ui,sans-serif;--elh:1.65;
+--sel:color-mix(in srgb,var(--accent) 16%,var(--panel));box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151F;--panel:#182030;--ink:#E8ECF4;--soft:#9AA5BB;--line:#2A344A;--hover:#1E2840;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10151F;--panel:#182030;--ink:#E8ECF4;--soft:#9AA5BB;--line:#2A344A;--hover:#1E2840;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",system-ui,sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:340px 1fr;height:100%;height:100dvh;max-width:1200px;margin:0 auto;background:var(--panel);border-inline:1px solid var(--line)}
+.side{position:relative;display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--line);background:var(--bg)}
+.top{display:flex;align-items:center;gap:8px;padding:16px 16px 8px}
+h1{font-size:1.5rem;margin:0;letter-spacing:-.01em}
+.ttl{margin-right:auto;min-width:0}
+.ttl small{color:var(--soft);font-size:.85rem}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 12px;min-height:44px;min-width:44px}
+#opts{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;padding:0}
+.fab{position:absolute;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:var(--onaccent);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 45%,transparent);z-index:5}
+.fab:active{transform:scale(.94)}
+.btn:hover{background:var(--hover)}
+.primary{background:var(--accent);color:var(--onaccent);border-color:var(--accent);font-weight:700}
+.primary:hover{background:var(--accent);filter:brightness(1.1)}
+.danger{background:#C92A2A;color:#fff;border-color:#C92A2A;font-weight:700}
+.danger:hover{background:#C92A2A;filter:brightness(1.1)}
+#q{margin:4px 16px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);min-height:48px;font-size:16px;padding-inline:18px}
+#list{list-style:none;margin:0;padding:4px 12px 96px;overflow:auto;flex:1}
+.item{display:block;flex:1;min-width:0;text-align:left;border:0;background:transparent;border-radius:12px;padding:12px 14px;margin-bottom:0}
+.compact .item{padding:6px 12px}
+.item:hover{background:var(--hover)}
+.item.on{background:var(--sel)}
+.item b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item span{display:block;color:var(--soft);font-size:.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+li.r{display:flex;align-items:stretch;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(20,30,50,.06);transition:border-color .15s,box-shadow .15s}
+li.r:has(.item.on){border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent),0 1px 3px rgba(20,30,50,.06)}
+.item b svg{width:14px;height:14px;color:var(--accent);margin-right:6px;vertical-align:-2px}
+.rm{border:0;background:transparent;color:var(--soft);border-radius:6px;padding:0 14px;min-width:48px;display:flex;align-items:center;justify-content:center;margin-bottom:0}
+.rm:hover{background:var(--hover);color:#C92A2A}
+.none{padding:24px 16px;color:var(--soft);text-align:center}
+.edit{display:flex;flex-direction:column;min-height:0;min-width:0}
+#editor{display:flex;flex-direction:column;flex:1;min-height:0}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line)}
+#back{display:none}
+.bar .sp{flex:1}
+.ibtn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0}
+.ibtn[aria-pressed="true"]{background:var(--sel);color:var(--accent);border-color:var(--accent)}
+.ibtn.del:hover{color:#C92A2A;border-color:#C92A2A}
+#editor:not([hidden]){animation:in .2s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#title{border:0;background:transparent;font-family:var(--efont);font-size:calc(var(--esize) + 8px);font-weight:700;padding:20px 20px 4px;width:100%}
+#body{flex:1;border:0;background:transparent;resize:none;padding:8px 20px 20px;font-family:var(--efont);font-size:var(--esize);line-height:var(--elh);width:100%;min-height:0}
+#title:focus,#body:focus{outline:none}
+#meta{padding:8px 16px;border-top:1px solid var(--line);color:var(--soft);font-size:.875rem}
+#empty{margin:auto;text-align:center;padding:24px;color:var(--soft);max-width:340px}
+#empty svg{display:block;margin:0 auto 12px;opacity:.9}
+#empty h2{color:var(--ink);margin:0 0 8px}
+.ov{position:fixed;inset:0;background:rgba(10,15,25,.55);display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
+.ov.show{display:flex}
+#dlg{z-index:20}
+.panel{background:var(--panel);border-radius:14px;width:min(520px,100%);max-height:100%;display:flex;flex-direction:column;border:1px solid var(--line)}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+.ph h2{margin:0;font-size:1.2rem}
+.pb{overflow:auto;padding:4px 18px 18px}
+.pb h3{font-size:1rem;margin:18px 0 4px;color:var(--accent)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row small{display:block;color:var(--soft);font-size:.8rem}
+.row select{padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.row input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+.row input[type=range]{accent-color:var(--accent);width:140px}
+.acc{display:flex;gap:8px}
+.sw{width:28px;height:28px;border-radius:50%;border:2px solid transparent;background:var(--c);padding:0}
+.sw[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--panel) inset}
+.acts{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px}
+.dbody{padding:18px}
+.dbody p{margin:0 0 16px}
+.dbtn{display:flex;justify-content:flex-end;gap:8px}
+#lock{z-index:40;background:var(--bg);flex-direction:column;gap:16px;overflow:auto;text-align:center}
+#lock h2{margin:0;font-size:1.4rem}
+#ls{min-height:1.4em;color:var(--soft);font-size:.95rem}
+.dots{display:flex;gap:14px;height:20px}
+.dots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--accent)}
+.dots i.on{background:var(--accent)}
+.dots.shake{animation:shk .35s}
+@keyframes shk{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+.pad{display:grid;grid-template-columns:repeat(3,76px);gap:14px;margin:6px 0}
+.pad button{width:76px;height:76px;border-radius:50%;border:1px solid var(--line);background:var(--panel);font-size:1.7rem;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0}
+.pad button:active{background:var(--sel)}
+.pad .x{border-color:transparent;background:transparent;color:var(--soft)}
+@media (max-height:660px){.pad{grid-template-columns:repeat(3,62px);gap:10px}.pad button{width:62px;height:62px;font-size:1.5rem}}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;display:none;z-index:30}
+@media (max-width:760px){
+h1{font-size:1.6rem}
+.item{padding:14px 12px}
+.compact .item{padding:10px 12px}
+.item b{font-size:1.05rem}
+#back{min-height:48px;padding:8px 18px}
+.row{padding:14px 0}
+.row select{min-height:44px}
+.row input[type=checkbox]{width:28px;height:28px}
+.sw{width:36px;height:36px}
+.acc{gap:10px}
+.acts .btn{min-height:48px}
+.app{grid-template-columns:1fr;border:0}
+.edit{display:none}
+body.editing .side{display:none}
+body.editing .edit{display:flex}
+#back{display:inline-block}
+.bar{display:flex}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="top">
+      <div class="ttl"><h1>Mes notes</h1><small id="sub"></small></div>
+      <button class="btn" id="opts" aria-label="Paramètres" title="Paramètres"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+    <input id="q" type="search" placeholder="Rechercher une note" aria-label="Rechercher une note">
+    <ul id="list"></ul>
+    <button class="fab" id="add" aria-label="Nouvelle note" title="Nouvelle note"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="display:block"><path d="M12 5v14M5 12h14"/></svg></button>
+  </aside>
+  <main class="edit">
+    <div id="empty">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+      <h2>Aucune note ouverte</h2>
+      <p>Choisis une note dans la liste ou crée-en une nouvelle.</p>
+    </div>
+    <div id="editor" hidden>
+      <div class="bar">
+        <button class="btn" id="back">← Retour</button>
+        <span class="sp"></span>
+        <button class="btn ibtn" id="pin" aria-label="Épingler la note" title="Épingler" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg></button>
+        <button class="btn ibtn del" id="del" aria-label="Supprimer la note" title="Supprimer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6"/></svg></button>
+      </div>
+      <input id="title" placeholder="Titre de la note" aria-label="Titre">
+      <textarea id="body" placeholder="Écris ta note ici…" aria-label="Contenu de la note"></textarea>
+      <div id="meta"></div>
+    </div>
+  </main>
+</div>
+
+<div class="ov" id="set" role="dialog" aria-modal="true" aria-label="Paramètres">
+  <div class="panel">
+    <div class="ph"><h2>Paramètres</h2><button class="btn" id="sclose">Fermer</button></div>
+    <div class="pb" id="sbody">
+      <h3>Apparence</h3>
+      <label class="row"><span>Thème<small>Clair ou sombre</small></span>
+        <select data-k="theme"><option value="light">Clair</option><option value="dark">Sombre</option></select></label>
+      <div class="row"><span>Couleur principale<small>Boutons et éléments sélectionnés</small></span><div class="acc" id="acc"></div></div>
+      <h3>Écriture</h3>
+      <label class="row"><span>Taille du texte<small id="sizev"></small></span><input type="range" data-k="size" min="14" max="26" step="1"></label>
+      <label class="row"><span>Espacement des lignes</span>
+        <select data-k="lh"><option value="1.4">Serré</option><option value="1.65">Normal</option><option value="1.9">Aéré</option></select></label>
+      <label class="row"><span>Correcteur orthographique<small>Souligne les fautes pendant que tu écris</small></span><input type="checkbox" data-k="spell"></label>
+      <label class="row"><span>Compteur de mots<small>Affiché sous la note</small></span><input type="checkbox" data-k="words"></label>
+      <h3>Liste des notes</h3>
+      <label class="row"><span>Trier par</span>
+        <select data-k="sort"><option value="updated">Dernière modification</option><option value="created">Date de création</option><option value="title">Titre (A à Z)</option></select></label>
+      <label class="row"><span>Aperçu du texte</span><input type="checkbox" data-k="preview"></label>
+      <label class="row"><span>Date de modification</span><input type="checkbox" data-k="date"></label>
+      <label class="row"><span>Affichage compact<small>Plus de notes à l’écran</small></span><input type="checkbox" data-k="compact"></label>
+      <h3>Sécurité</h3>
+      <div class="row"><span>Code de verrouillage<small id="lockst"></small></span></div>
+      <div class="acts"><button class="btn" id="lset"></button><button class="btn" id="lrm">Retirer le code</button></div>
+      <h3>Données</h3>
+      <div class="row"><span>Notes enregistrées<small>Stockées dans ce navigateur</small></span><b id="count"></b></div>
+      <h3>Réinitialisation</h3>
+      <div class="acts">
+        <button class="btn" id="reset">Réinitialiser les paramètres</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dmsg">
+  <div class="panel" style="width:min(420px,100%)">
+    <div class="dbody"><p id="dmsg"></p>
+      <div class="dbtn"><button class="btn" id="dno">Annuler</button><button class="btn danger" id="dok"></button></div>
+    </div>
+  </div>
+</div>
+<div class="ov" id="lock" role="dialog" aria-modal="true" aria-labelledby="lt">
+  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+  <h2 id="lt"></h2>
+  <div id="ls" aria-live="polite"></div>
+  <div class="dots" id="dots"></div>
+  <div class="pad" id="pad"></div>
+  <button class="btn" id="lcancel">Annuler</button>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+var KEY='notes-v1',SKEY='notes-settings-v1';
+var DEF={theme:'light',accent:'#4F6BED',size:17,lh:'1.65',sort:'updated',preview:true,date:true,compact:false,words:true,spell:true};
+var ACC=[['#4F6BED','Indigo'],['#0F9D8A','Turquoise'],['#D6336C','Framboise'],['#E8590C','Orange'],['#2F9E44','Vert'],['#7048E8','Violet']];
+var $=function(s){return document.querySelector(s)};
+var TRASH='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6"/></svg>';
+var PIN='<svg viewBox="0 0 24 24" fill="currentColor" aria-label="Épinglée"><path d="M16 3a1 1 0 0 1 .7 1.7L15 6.4V11l2.6 2.2a1 1 0 0 1 .4.8V15a1 1 0 0 1-1 1h-4v5h-2v-5H7a1 1 0 0 1-1-1v-1a1 1 0 0 1 .4-.8L9 11V6.4L7.3 4.7A1 1 0 0 1 8 3z"/></svg>';
+var notes=[],S=Object.assign({},DEF),cur=null,query='',pending=null,saveTimer=null,toastTimer=null;
+var LKEY='notes-lock-v1',LK=null,code='',lockCb=null,fails=0,until=0,hiddenAt=0;
+var layers=[],pendB=0,ign=0;
+function isMob(){return window.matchMedia('(max-width:760px)').matches}
+function lpush(n){if(!isMob())return;layers.push(n);history.pushState({l:n},'')}
+function lpop(n){var i=layers.lastIndexOf(n);if(i<0)return;layers.splice(i,1);pendB++;setTimeout(function(){if(pendB){ign++;history.go(-pendB);pendB=0}},0)}
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function get(id){return notes.filter(function(n){return n.id===id})[0]}
+function fmt(t){
+  var d=new Date(t),now=new Date();
+  if(d.toDateString()===now.toDateString())return 'Aujourd’hui, '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:d.getFullYear()===now.getFullYear()?undefined:'numeric'});
+}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(notes))}catch(e){}}
+function persistS(){try{localStorage.setItem(SKEY,JSON.stringify(S))}catch(e){}}
+function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(persist,300)}
+function toast(m){var t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.style.display='none'},3000)}
+
+function load(){
+  var raw=null;
+  try{raw=localStorage.getItem(KEY);var s=localStorage.getItem(SKEY);if(s)Object.assign(S,JSON.parse(s))}catch(e){}
+  try{var lk=JSON.parse(localStorage.getItem(LKEY));if(lk&&lk.h&&lk.s)LK=lk}catch(e){}
+  if(S.theme!=='light'&&S.theme!=='dark')S.theme=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  if(raw){try{notes=JSON.parse(raw)||[]}catch(e){notes=[]}}
+  else{notes=[{id:uid(),title:'Bienvenue dans tes notes',pinned:true,created:Date.now(),updated:Date.now(),
+  body:'Voici comment ça marche :\n\n• Appuie sur le bouton + en bas à gauche pour créer une note.\n• Écris : tout est enregistré automatiquement dans ton navigateur.\n• La recherche cherche dans les titres et dans le texte.\n• L’épingle en haut d’une note la garde en tête de liste.\n• Avec l’engrenage en haut à droite, tu règles le thème, la couleur, la taille du texte, le tri et l’affichage de la liste.\n• Pour supprimer une note, appuie sur la poubelle, à droite de la note dans la liste ou en haut de la note ouverte : une confirmation est demandée.\n\nTu peux supprimer cette note quand tu veux.'}]}
+}
+function apply(){
+  var r=document.documentElement;
+  r.setAttribute('data-theme',S.theme==='dark'?'dark':'light');
+  var tc=document.querySelector('meta[name=theme-color]');if(tc)tc.setAttribute('content',S.theme==='dark'?'#10151F':'#EEF1F6');
+  r.style.setProperty('--accent',S.accent);
+  r.style.setProperty('--esize',S.size+'px');
+  r.style.setProperty('--elh',S.lh);
+  $('#body').spellcheck=!!S.spell;
+  $('#list').className=S.compact?'compact':'';
+  var n=get(cur);if(n)renderMeta(n);
+}
+function nrm(s){return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function visible(){
+  var q=nrm(query.trim());
+  return notes.filter(function(n){return !q||nrm(n.title+' '+n.body).indexOf(q)>-1})
+  .sort(function(a,b){
+    if(!!a.pinned!==!!b.pinned)return a.pinned?-1:1;
+    if(S.sort==='title')return (a.title||'').localeCompare(b.title||'','fr');
+    if(S.sort==='created')return (b.created||0)-(a.created||0);
+    return b.updated-a.updated;
+  });
+}
+function renderList(){
+  $('#sub').textContent=notes.length+' note'+(notes.length>1?'s':'');
+  var l=visible();
+  if(!l.length){$('#list').innerHTML='<li class="none">'+(notes.length?'Aucune note ne correspond.':'Tu n’as pas encore de note. Appuie sur le bouton + en bas à gauche.')+'</li>';return}
+  $('#list').innerHTML=l.map(function(n){
+    var prev=n.body.replace(/\s+/g,' ').trim()||'Note vide';
+    return '<li class="r"><button class="item'+(n.id===cur?' on':'')+'" data-id="'+n.id+'"><b>'+(n.pinned?PIN:'')+esc(n.title||'Sans titre')+'</b>'
+      +(S.preview?'<span>'+esc(prev)+'</span>':'')+(S.date?'<span>'+fmt(n.updated)+'</span>':'')+'</button><button class="rm" data-rm="'+n.id+'" aria-label="Supprimer la note '+esc(n.title||'Sans titre')+'" title="Supprimer">'+TRASH+'</button></li>';
+  }).join('');
+}
+function renderMeta(n){
+  var w=n.body.trim()?n.body.trim().split(/\s+/).length:0;
+  $('#meta').textContent='Modifiée : '+fmt(n.updated)+(S.words?' · '+w+' mot'+(w>1?'s':''):'')+' · Enregistrée automatiquement';
+}
+function openNote(id){
+  var n=get(id);
+  if(!n){lpop('edit');cur=null;$('#editor').hidden=true;$('#empty').hidden=false;document.body.classList.remove('editing');renderList();return}
+  cur=id;$('#empty').hidden=true;$('#editor').hidden=false;
+  $('#title').value=n.title;$('#body').value=n.body;$('#pin').setAttribute('aria-pressed',!!n.pinned);
+  renderMeta(n);renderList();document.body.classList.add('editing');
+  if(layers.indexOf('edit')<0)lpush('edit');
+}
+
+/* Confirmation */
+function ask(msg,label,fn){
+  $('#dmsg').textContent=msg;$('#dok').textContent=label;pending=fn;
+  $('#dlg').classList.add('show');lpush('dlg');$('#dno').focus();
+}
+function closeAsk(){$('#dlg').classList.remove('show');pending=null;lpop('dlg')}
+$('#dno').onclick=closeAsk;
+$('#dok').onclick=function(){var f=pending;closeAsk();if(f)f()};
+$('#dlg').onclick=function(e){if(e.target.id==='dlg')closeAsk()};
+
+/* Notes */
+function delNote(n){
+  ask('Supprimer la note « '+(n.title||'Sans titre')+' » ? Cette action est définitive.','Supprimer',function(){
+    notes=notes.filter(function(x){return x.id!==n.id});persist();
+    if(cur===n.id)openNote(null);else renderList();
+    toast('Note supprimée.');
+  });
+}
+$('#del').onclick=function(){var n=get(cur);if(n)delNote(n)};
+$('#pin').onclick=function(){var n=get(cur);if(!n)return;n.pinned=!n.pinned;persist();this.setAttribute('aria-pressed',!!n.pinned);renderList();toast(n.pinned?'Note épinglée.':'Note désépinglée.')};
+$('#add').onclick=function(){
+  var t=Date.now(),n={id:uid(),title:'',body:'',pinned:false,created:t,updated:t};
+  notes.unshift(n);persist();query='';$('#q').value='';openNote(n.id);$('#title').focus();
+};
+$('#q').oninput=function(e){query=e.target.value;renderList()};
+$('#list').onclick=function(e){
+  var r=e.target.closest('[data-rm]');
+  if(r){
+    var n=get(r.getAttribute('data-rm'));if(n)delNote(n);
+    return;
+  }
+  var b=e.target.closest('[data-id]');if(b)openNote(b.getAttribute('data-id'));
+};
+function edited(){
+  var n=get(cur);if(!n)return;
+  n.title=$('#title').value;n.body=$('#body').value;n.updated=Date.now();
+  saveSoon();renderMeta(n);renderList();
+}
+$('#title').oninput=edited;$('#body').oninput=edited;
+$('#back').onclick=function(){lpop('edit');document.body.classList.remove('editing');renderList()};
+window.addEventListener('popstate',function(){
+  if(ign>0){ign--;return}
+  var t=layers.pop();
+  if(t==='dlg'){$('#dlg').classList.remove('show');pending=null}
+  else if(t==='set'){$('#set').classList.remove('show')}
+  else if(t==='edit'){document.body.classList.remove('editing');renderList()}
+  else if(isMob()){history.pushState({g:1},'')}
+});
+
+/* Code de verrouillage */
+function hashCode(c,salt){
+  var data=new TextEncoder().encode(salt+':'+c);
+  if(window.crypto&&crypto.subtle)return crypto.subtle.digest('SHA-256',data).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return ('0'+x.toString(16)).slice(-2)}).join('')});
+  var h=5381;for(var i=0;i<data.length;i++)h=((h<<5)+h+data[i])|0;
+  return Promise.resolve(String(h));
+}
+function drawDots(){var h='';for(var i=0;i<4;i++)h+='<i'+(i<code.length?' class="on"':'')+'></i>';$('#dots').innerHTML=h}
+function askPad(title,sub,canCancel,cb){
+  code='';lockCb=cb;$('#lt').textContent=title;$('#ls').textContent=sub||'';
+  $('#lcancel').style.display=canCancel?'':'none';drawDots();$('#lock').classList.add('show');
+}
+function closePad(){$('#lock').classList.remove('show');lockCb=null;code=''}
+function padKey(d){
+  if(code.length>=4||!lockCb)return;
+  code+=d;drawDots();
+  if(code.length===4){var c=code,f=lockCb;setTimeout(function(){f(c)},120)}
+}
+function padDel(){code=code.slice(0,-1);drawDots()}
+function padWrong(msg){
+  $('#ls').textContent=msg;$('#dots').classList.add('shake');code='';
+  setTimeout(function(){drawDots();$('#dots').classList.remove('shake')},400);
+}
+function lockApp(){
+  if(!LK)return;
+  askPad('Entre ton code','',false,function(c){
+    if(Date.now()<until){padWrong('Réessaie dans '+Math.ceil((until-Date.now())/1000)+' s');return}
+    hashCode(c,LK.s).then(function(h){
+      if(h===LK.h){fails=0;closePad()}
+      else{fails++;if(fails>=5){fails=0;until=Date.now()+30000}padWrong('Code incorrect')}
+    });
+  });
+}
+function verify(title,ok){
+  askPad(title,'',true,function(c){hashCode(c,LK.s).then(function(h){if(h===LK.h)ok();else padWrong('Code incorrect')})});
+}
+function newCode(){
+  var first='';
+  function step1(){
+    askPad('Nouveau code','Choisis 4 chiffres',true,function(c){
+      first=c;
+      askPad('Confirme le code','',true,function(c2){
+        if(c2!==first){padWrong('Les codes sont différents');setTimeout(step1,900);return}
+        var salt=Math.random().toString(36).slice(2)+Date.now().toString(36);
+        hashCode(c2,salt).then(function(h){
+          LK={s:salt,h:h};try{localStorage.setItem(LKEY,JSON.stringify(LK))}catch(e){}
+          closePad();fillSettings();toast('Code activé.');
+        });
+      });
+    });
+  }
+  step1();
+}
+(function(){
+  var h='';
+  for(var i=1;i<=9;i++)h+='<button data-d="'+i+'" aria-label="'+i+'">'+i+'</button>';
+  h+='<span></span><button data-d="0" aria-label="0">0</button><button class="x" data-x="1" aria-label="Effacer"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="M17 9l-5 6M12 9l5 6"/></svg></button>';
+  $('#pad').innerHTML=h;
+})();
+$('#pad').onclick=function(e){var b=e.target.closest('button');if(!b)return;if(b.dataset.d)padKey(b.dataset.d);else padDel()};
+$('#lcancel').onclick=closePad;
+$('#lset').onclick=function(){if(LK)verify('Code actuel',newCode);else newCode()};
+$('#lrm').onclick=function(){verify('Code actuel',function(){LK=null;try{localStorage.removeItem(LKEY)}catch(e){}closePad();fillSettings();toast('Code retiré.')})};
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){hiddenAt=Date.now()}
+  else if(LK&&hiddenAt&&Date.now()-hiddenAt>30000&&!$('#lock').classList.contains('show')){lockApp()}
+});
+
+/* Paramètres */
+function fillSettings(){
+  document.querySelectorAll('#sbody [data-k]').forEach(function(el){
+    var v=S[el.getAttribute('data-k')];
+    if(el.type==='checkbox')el.checked=!!v;else el.value=v;
+  });
+  $('#sizev').textContent=S.size+' px';
+  $('#acc').innerHTML=ACC.map(function(a){return '<button class="sw" data-a="'+a[0]+'" style="--c:'+a[0]+'" aria-label="'+a[1]+'" aria-pressed="'+(S.accent===a[0])+'"></button>'}).join('');
+  $('#count').textContent=notes.length;
+  $('#lockst').textContent=LK?'Activé : demandé à l’ouverture de l’appli':'Désactivé';
+  $('#lset').textContent=LK?'Changer le code':'Ajouter un code';
+  $('#lrm').style.display=LK?'':'none';
+}
+function closeSet(){if($('#set').classList.contains('show')){$('#set').classList.remove('show');lpop('set')}}
+$('#opts').onclick=function(){fillSettings();$('#set').classList.add('show');lpush('set')};
+$('#sclose').onclick=closeSet;
+$('#set').onclick=function(e){if(e.target.id==='set')closeSet()};
+$('#sbody').addEventListener('input',function(e){
+  var el=e.target.closest('[data-k]');if(!el)return;
+  var k=el.getAttribute('data-k');
+  S[k]=el.type==='checkbox'?el.checked:(el.type==='range'?Number(el.value):el.value);
+  persistS();apply();renderList();$('#sizev').textContent=S.size+' px';
+});
+$('#acc').onclick=function(e){
+  var b=e.target.closest('[data-a]');if(!b)return;
+  S.accent=b.getAttribute('data-a');persistS();apply();fillSettings();
+};
+$('#reset').onclick=function(){
+  ask('Remettre tous les paramètres par défaut ? Tes notes ne sont pas touchées.','Réinitialiser',function(){
+    S=Object.assign({},DEF);persistS();apply();renderList();fillSettings();toast('Paramètres réinitialisés.');
+  });
+};
+document.addEventListener('keydown',function(e){
+  if($('#lock').classList.contains('show')){
+    if(/^[0-9]$/.test(e.key))padKey(e.key);else if(e.key==='Backspace')padDel();else if(e.key==='Escape'&&$('#lcancel').style.display!=='none')closePad();
+    return;
+  }
+  if(e.key!=='Escape')return;
+  if($('#dlg').classList.contains('show'))closeAsk();else closeSet();
+});
+
+load();apply();renderList();
+if(LK)lockApp();
+if(isMob()){history.replaceState({d:0},'');history.pushState({g:1},'')}
+if(window.matchMedia&&!window.matchMedia('(max-width:760px)').matches){var f=visible()[0];if(f)openNote(f.id)}
+})();
+</script>
+<script>if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
+</body>
+</html>

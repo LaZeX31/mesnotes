@@ -1,0 +1,33 @@
+{
+  "name": "mes-notes",
+  "productName": "Mes notes",
+  "version": "1.0.0",
+  "description": "Prends des notes simplement, tout reste sur ton appareil.",
+  "author": "Ton nom",
+  "license": "MIT",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "fr.mesnotes.app",
+    "productName": "Mes notes",
+    "directories": { "output": "dist" },
+    "files": ["index.html", "electron/**", "icons/**"],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": ["nsis", "portable"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Mes-notes-installateur-${version}.${ext}"
+    },
+    "portable": { "artifactName": "Mes-notes-portable-${version}.${ext}" }
+  }
+}
