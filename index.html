@@ -160,27 +160,14 @@ h1{font-size:1.6rem}
 .sw{width:36px;height:36px}
 .acc{gap:10px}
 .acts .btn{min-height:48px}
-.app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,38%) minmax(0,1fr);border:0}
-.side{border-right:0;border-bottom:2px solid var(--line)}
-.app{grid-template-rows:minmax(0,44%) minmax(0,1fr)}
-.side{overflow:hidden}
-.top{padding:8px 12px 2px}
-.ttl{display:flex;align-items:baseline;gap:8px}
-h1{font-size:1.3rem}
-#opts{width:40px;height:40px}
-#q{margin:2px 12px 6px;min-height:40px;padding-block:6px}
-.tabs{margin:0 12px 6px;padding:3px}
-.tabs button{min-height:34px;padding:3px 10px}
-.chips{padding:0 14px 6px;gap:8px}
-.chip{width:22px;height:22px}
-#list{padding:2px 10px 10px}
-.fab{top:8px;right:60px;left:auto;bottom:auto;width:40px;height:40px;font-size:1.4rem;box-shadow:none}
-.item{padding:8px 12px}
-#list{padding-bottom:84px}
-#back{display:none}
+.app{grid-template-columns:1fr;border:0}
+.edit{display:none}
+body.editing .side{display:none}
+body.editing .edit{display:flex}
+#back{display:inline-block}
 .bar{display:flex;padding:6px 12px}
-#title{padding:12px 16px 2px}
-#body{padding:6px 16px 12px}
+.chips{padding:0 16px 10px;gap:10px}
+#list{padding-bottom:96px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -413,7 +400,7 @@ function openNote(id){
   cur=id;$('#empty').hidden=true;$('#editor').hidden=false;
   $('#title').value=n.title;setRows(n.body);markNote(n);markPal(null);$('#pin').setAttribute('aria-pressed',!!n.pinned);
   renderMeta(n);renderList();document.body.classList.add('editing');
-  
+  if(layers.indexOf('edit')<0)lpush('edit');
 }
 
 /* Confirmation */
@@ -678,7 +665,7 @@ load();notes=notes.filter(function(n){return !n.deleted||Date.now()-n.deleted<25
 document.addEventListener('visibilitychange',function(){if(!document.hidden){rollDay();syncNow(true)}});setInterval(rollDay,60000);setInterval(function(){if(!document.hidden)syncNow(true)},30000);
 if(LK)lockApp();
 if(isMob()){history.replaceState({d:0},'');history.pushState({g:1},'')}
-{var f=visible()[0];if(f)openNote(f.id)}
+if(window.matchMedia&&!window.matchMedia('(max-width:760px)').matches){var f=visible()[0];if(f)openNote(f.id)}
 })();
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
